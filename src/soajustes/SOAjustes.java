@@ -2,6 +2,7 @@
 package soajustes;
 
 import java.util.Scanner;
+import java.util.ArrayList;
 
 
 public class SOAjustes {
@@ -52,7 +53,7 @@ public class SOAjustes {
                 for (int i = 0; i < procesos.length; i++) {
                     System.out.println("Ingrese el tamaño y la duración del proceso " + (i + 1) + " separados por espacio:");
                     String[] procesoInput = leer.nextLine().split(" ");
-                    procesos[i][6]=0;
+                    procesos[i][5]=0;
 
                     if (procesoInput.length == 2) {
                         try {
@@ -84,6 +85,11 @@ public class SOAjustes {
         int tamaño = mem - so;
         boolean ejecucion = true, estado1 = true;
         int ajustes = 0;
+        boolean banderaEspacio = false, banderaFaltantes = true;
+
+        ArrayList<Integer> procesosExec = new ArrayList<>();
+        ArrayList<Integer> procesosWait = new ArrayList<>();
+        ArrayList<Integer> procesosFin = new ArrayList<>();
         
         //Primer ajuste
         while(ajustes<=3){
@@ -94,13 +100,16 @@ public class SOAjustes {
                         //estado1
                          for (int j = 0; j<procesos.length && tamaño >= 0 && estado1 == true; j++) {
                             if(procesos[j][0]<=tamaño){
+                                banderaEspacio = true;
                                 if(j<=0){
                                 base = procesos[j][0]+so;
                                 System.out.print("| P"+j+" | "+so+" - "+base);
-                                procesos[j][4]=so; 
-                                procesos[j][5]=base;
+                                procesos[j][3]=so; 
+                                procesos[j][4]=base;
+                                procesos[j][5]=1;
                                 tamaño-=procesos[j][0];
                                 System.out.println("     Base: "+base+ " Tamaño: "+tamaño);
+                                procesosExec.add(j);
 
                                 }   
                                     else if((base+procesos[j][0])>mem){
@@ -111,22 +120,62 @@ public class SOAjustes {
                                             base+=procesos[j][0];  
                                             tamaño-=procesos[j][0];
                                             System.out.println("     Base: "+base+ " Tamaño: "+tamaño);
-                                            procesos[j][4]=base;
-                                            procesos[j][5]=tamaño;
-                                            procesos[j][6]=1;
+                                            procesos[j][3]=base;
+                                            procesos[j][4]=tamaño;
+                                            procesos[j][5]=1;
+                                            procesosExec.add(j);
                                       }
                             } 
                                 else{
                                     continue;
                                 }
                         }
-                        estado1 = false;
-                        if(tamaño!=0)
-                        System.out.println("| -- | "+base+" - "+mem);
+
+                        if(banderaEspacio){
+                            estado1 = false;
+                            if(tamaño!=0)
+                            System.out.println("| -- | "+base+" - "+mem);
+
+
+
+                            //siguientes estados
+                                externo:
+                                for(int p=0, e=0;p<procesos.length;p++,e++){
+                                    //si faltan procesos por ejecutar
+                                    for (int j = 0; j < procesos.length; j++) { 
+                                        int contadorProcesosTerminados=0; //comprobar que los procesos hayan todos salido
+                                        if(procesos[j][5]==0){
+                                          procesosWait.add(j);
+                                          
+                                        }
+                                        if(procesos[j][5]==2){
+                                            contadorProcesosTerminados++;
+                                        }
+                                        if(contadorProcesosTerminados==cantidadProcesos){   //POSIBLE ERROR, CUIDAR ÍNDICES
+                                            break externo;
+                                        }
+                                    }
+
+
+
+
+                                        
+
+                                }
+
+                         }
+                          else{
+                            System.out.println("No hay espacio para ningun proceso: ");
+                            break;
+                          }
+
+                          
+
+
 
                         //break;
                 
-                    //siguientes estados
+                    
                         
 
                    
