@@ -112,7 +112,7 @@ public class SOAjustes {
                         banderaEspacio = true;
                         if (j <= 0) {
                             base = procesos[j][0] + so;
-                            System.out.print("| P" + j + " | " + (so+1) + " - " + base);
+                            System.out.println("| P" + j + " | " + (so+1) + " - " + base);
                             procesos[j][3] = so;
                             procesos[j][4] = base;
                             procesos[j][5] = 1;
@@ -126,7 +126,7 @@ public class SOAjustes {
                         } else if ((base + procesos[j][0]) > mem) {
                             continue;
                         } else {
-                            System.out.print("| P" + j + " | " + (base+1) + " - " + (procesos[j][0] + base));
+                            System.out.println("| P" + j + " | " + (base+1) + " - " + (procesos[j][0] + base));
                             procesos[j][3] = base;
                             procesos[j][4] = procesos[j][0]+base;
                             //System.out.println("BASE: "+(base+1));
@@ -259,40 +259,7 @@ public class SOAjustes {
                                     System.out.println("");
                                  }
                                  */
-                            //NODOS
-
-                            for(int j=0;j<ram.length;j++){
-                                int indice=ram[j];
-                                if(indice==-2){
-                                
-                                    /* 
-                                    if(base == 0){  //no hay nodos y el que será creado puede estar en cualquier rango
-                                                base=procesos[indice][3];
-                                                tamaño=procesos[indice][4]-base;
-                                                int matriz[][] ={{base,tamaño}};
-                                                nodos.set(0,matriz);
-
-                                            }
-                                            else if(base>0 && procesosSalidos<1){   //ya hay un nodo y el proceso cabe dentro de el
-                                                
-
-                                            }
-                                             else if(procesosSalidos>1){   //hay más de un nodo, y lo agregaremos al final de la lista
-                                                 base=procesos[indice][3];
-                                                tamaño=procesos[indice][4]-base;
-                                                int matriz[][] ={{base,tamaño}};
-                                                nodos.add(matriz);
-
-                                 
-                                            }
-                                            */
-
-
-
-
-
-                                        }
-                            }           
+                                       
                            
                                  //IMPRIMIR BLOQUE RAM
                             int temp=-50;
@@ -351,7 +318,7 @@ public class SOAjustes {
                             for (int j = 0; j < nodos.size(); j++) {
                                 int[][] nodo = nodos.get(j);
                                 if(base!=0){
-                                System.out.println("Nodo " + (j + 1) + ":"); // Utiliza j en lugar de i para el número del nodo
+                                System.out.println("Nodo " + j + ":"); // Utiliza j en lugar de i para el número del nodo
                                 System.out.println("Base: " + nodo[0][0] + ". Tamaño = " + nodo[0][1]);
                                 System.out.println();
                                 }
@@ -369,27 +336,33 @@ public class SOAjustes {
                         } else if (!IO) {
                             IO = true;
 
-                            //encontrar por fifo el proceso de menor tamaño
-                            int tamañoMenor = 0;
-                            int indiceMenor = procesosWait.get(0);
-                            for (int j = 1; j < procesosWait.size(); j++) {
-                                int indice = procesosWait.get(j);
-                                if (procesos[indice][0] <= procesos[indiceMenor][0]) {
-                                    tamañoMenor = procesos[indice][0];                             
-                                    indiceMenor = indice;
-
-                                }
-                                 else{
-                                    tamañoMenor=procesos[indiceMenor][0];
-                                 }
-                            }
-
-                            for(int j=0; j<nodos.size();j++){
-                                int[][] nodo=nodos.get(j);
-                                 if(tamañoMenor<=nodo[j][1]){
+                            for(int j= 0;j<3;j++){
+                                switch (j) {
+                                    case 0:
                                     
-                                    break;
-                                 }
+                                     for(int k= 0;k<procesosWait.size();k++){
+                                        int indice = procesosWait.get(k);
+                                            for(int h = 0;h<nodos.size();h++){
+                                                int [][] nodo = nodos.get(h);
+                                                for(int l = 0;l<nodo.length;l++){
+                                                    int tamañoNodo = nodo[l][1];
+                                                     if(procesos[indice][0]<=tamañoNodo){
+                                                        for(int m=nodo[l][0]+1;m<=tamañoNodo;m++){
+                                                            
+                                                        }
+                                                     }
+                                                }
+                                            }
+                                     }
+
+                                        break;
+                                    case 1:
+
+                                        break;
+                                    default:
+                                        break;
+                                }
+
                             }
 
 
