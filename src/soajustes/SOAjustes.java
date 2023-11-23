@@ -20,6 +20,8 @@ public class SOAjustes {
         int[][] procesos = null;
         int [] ram =null;
         ArrayList<int[][]> nodos = new ArrayList<>();
+        ArrayList<Integer> procesosExec = new ArrayList<>();
+        ArrayList<Integer> procesosWait = new ArrayList<>();
 
         // preguntar tamaño memoria
         while (inte) {
@@ -64,6 +66,7 @@ public class SOAjustes {
                             "Ingrese el tamaño y la duración del proceso " + (i + 1) + " separados por espacio:");
                     String[] procesoInput = leer.nextLine().split(" ");
                     procesos[i][5] = 0;
+                    procesosWait.add(i);
 
                     if (procesoInput.length == 2) {
                         try {
@@ -90,24 +93,21 @@ public class SOAjustes {
         int base = so;
         int tamaño = mem - so;
         boolean ejecucion = true, estado1 = true;
-        int ajustes = 0;
-        boolean banderaEspacio = false, banderaFaltantes = true;
+        boolean banderaEspacio = false;
 
-        ArrayList<Integer> procesosExec = new ArrayList<>();
-        ArrayList<Integer> procesosWait = new ArrayList<>();
+        
         
 
-        // Primer ajuste
-        while (ajustes <= 3) {
-            for (int estado = 0, i = 0; ejecucion; estado++) {
-                System.out.println("Estado " + estado);
+       
+            
+                System.out.println("Estado 1");
                 System.out.println("| SO | 0 - " + so);
                 for(int j=0;j<=tamaño+1;j++){
                     ram[j] = -50;
                 }
 
-                // estado1
-                for (int j = 0; j < procesos.length && tamaño >= 0 && estado1 == true; j++) {
+                // ESTADO 0, PROCESOS ENTRAN A MEMORIA
+                for (int j = 0; j < procesos.length && tamaño > 0 && estado1 == true; j++) {
                     if (procesos[j][0] <= tamaño) {
                         banderaEspacio = true;
                         if (j <= 0) {
@@ -122,6 +122,11 @@ public class SOAjustes {
                             tamaño -= procesos[j][0];
                             
                             procesosExec.add(j);
+
+                            for(int k=0;k<procesosWait.size();k++){
+                                if(procesosWait.get(k) == j)
+                                    procesosWait.remove(k);
+                            }
 
                         } else if ((base + procesos[j][0]) > mem) {
                             continue;
@@ -139,25 +144,22 @@ public class SOAjustes {
                             
                             procesos[j][5] = 1;
                             procesosExec.add(j);
+                            for(int k=0;k<procesosWait.size();k++){
+                                if(procesosWait.get(k) == j)
+                                    procesosWait.remove(k);
+                            }
                         }
                     } else {
                         continue;
                     }
                 }
-
+                externo:
                 if (banderaEspacio) {
-                    /*for(int j=0;j<ram.length;j++){ 
-                                    System.out.print("J:  "+j+" PROCESOS: "+ram[j]);
-                                    System.out.println("");
-                                 }
-                    */
                     estado1 = false;
                     boolean IO = true; // verdadero = salen procesos, falso = entran procesos
                     if (tamaño != 0){
                         System.out.println("| -- | " + (base+1) + " - " + (mem-1));
                         tamaño-=2;
-                        //int [][] matriz ={{base,tamaño}};
-                        //nodos.add(matriz);
                         System.out.println("Base: "+base+". Tamaño = "+tamaño);
 
                     }
@@ -171,19 +173,16 @@ public class SOAjustes {
                         System.out.println("---");
                     }
 
-                    externo:
+                    
                     // siguientes estados
-                    for (int e = 1; banderaEspacio == true; e++) {
+                    for (int e = 1; banderaEspacio; e++) {
                         System.out.println("Estado: " + e);
                         System.out.println("| SO | 0 - " + so);
 
                         // si faltan procesos por ejecutar. AGREGAR RESTO DE PROCESOS A PROCESOSWAIT
                         for (int j = 0; j < procesos.length; j++) {
                             int contadorProcesosTerminados = 0; // comprobar que los procesos hayan todos salido
-                            if (procesos[j][5] == 0) {
-                                procesosWait.add(j);
-
-                            }
+                            
                             if (procesos[j][5] == 2) {
                                 contadorProcesosTerminados++;
                             }
@@ -194,9 +193,10 @@ public class SOAjustes {
                             }
                         }
  
-                        int procesosSalidos = 0;
+                        
                         if (IO) { //comprobar que todos los procesos posibles que puedan salir salgan
                             IO = false;
+                            System.out.println("salen procesos");
                             // hallar proceso que saldrá, el proceso de menor duración
                             int duracionMenor = 0;
                             int indiceMenor = procesosExec.get(0);
@@ -231,24 +231,31 @@ public class SOAjustes {
                             // restarle la ráfaga de ese primer proceso
                             int rafagaRestar = procesos[indiceMenor][1];
                             procesos[indiceMenor][5] = 2; // indicar que ese proceso salió
-                            procesosSalidos = 1; // contador que me servirá para saber si hay más de un proceso que
-                                                 // saldrá y dejará más de un hueco en memoria
+                            System.out.println("ProcesosWait");
+                                    for(int j=0;j<procesosWait.size();j++){
+                                        System.out.println(procesosWait.get(j));
+                                    }
 
                             
                             // indicar los procesos en ejecución que saldrán
                                 Iterator<Integer> iterator = procesosExec.iterator();
                                 while (iterator.hasNext()) {
+                                    System.out.println("ProcesosExec");
+                                    for(int j=0;j<procesosExec.size();j++){
+                                        System.out.println(procesosExec.get(j));
+                                    }
                                     int indice = iterator.next();
                                     procesos[indice][1] -= rafagaRestar;
+                                    System.out.println("Proceso: "+indice+" Ráfaga: "+procesos[indice][1]+" RafagaRestar: "+rafagaRestar);
                                         if (procesos[indice][1] <= 0) {
                                             procesos[indice][5] = 2;
                                             for(int k=procesos[indice][3]+1;k<=procesos[indice][4];k++){
                                                 
                                                 ram[k] = -2;
                                             }
-                                            //System.out.println("k: "+procesos[indice][3]);
-                                            //System.out.println("Limite: "+procesos[indice][4]);
-                                            procesosSalidos++;
+                                            System.out.println("k: "+procesos[indice][3]);
+                                            System.out.println("Limite: "+procesos[indice][4]);
+                                            
                                             iterator.remove();
                                          } 
                                          
@@ -261,131 +268,135 @@ public class SOAjustes {
                                  */
                                        
                            
-                                 //IMPRIMIR BLOQUE RAM
-                            int temp=-50;
-                            for(int j=0;j<=ram.length;j++){
-                                 
-                                if(j==ram.length){   //ultimo bloque
-                                    System.out.print(j-1);
-                                    System.out.println("");
-                                    break;
-                                 }
-                                int proceso = ram[j];
-                                if(proceso!=temp && temp!=-50){
-                                    System.out.print(j-1);
-                                    System.out.println("");
-                                
-                                 }
-                                
-                                 if(proceso>=0 && proceso!=temp){  //1. proceso 0 temp = -3 proceso 0 temp = 0
-                                    temp = ram[j]; //2. 0
-                                    System.out.print("| P"+temp+" | "+ j +" - ");
-                                    }
-                                if(proceso == -2 && proceso!=temp){
-                                    temp=ram[j];
-                                    System.out.print("| -- | "+j+" - ");
-                                }
-                                 
-                            }
-
-                            // Ajustar el código para registrar los nodos correctamente
-                                    for (int j = 0; j < ram.length; j++) {
-                                        int proceso = ram[j];
-                                        if (proceso == -2) {
-                                         base = j;
-                                        tamaño = 0;
-
-                                        // Encontrar el final del nodo (cambios de procesos o espacio vacío)
-                                        while (j < ram.length && (ram[j] == -2 || ram[j] == proceso)) {
-                                            tamaño++;
-                                            j++;
+                            imprimirBloqueRAM(ram, nodos);
+                            for(int k=0;k<procesos.length;k++){
+                                        System.out.print("P"+k+": "+procesos[k][1]+", ");
                                         }
-
-                                        // Restar 1 al tamaño para obtener el rango real (índices basados en 0)
-                                        tamaño--;
-
-                                        // Almacenar el nodo si tiene un tamaño válido
-                                        if (tamaño > 0) {
-                                            int[][] nodo = { { base, tamaño } };
-                                            nodos.add(nodo);
-                                            }
-                                        }
-                                    }
-
-
-
-                            //NODOS
-                            for (int j = 0; j < nodos.size(); j++) {
-                                int[][] nodo = nodos.get(j);
-                                if(base!=0){
-                                System.out.println("Nodo " + j + ":"); // Utiliza j en lugar de i para el número del nodo
-                                System.out.println("Base: " + nodo[0][0] + ". Tamaño = " + nodo[0][1]);
-                                System.out.println();
-                                }
-                                else{
-                                    System.out.println("Nodo 0:");
-                                    System.out.println("Base: 0. Tamaño = 0");
-                                }
-                            }
-                            
-
-
-
-                            System.exit(0);
-                        
+                                
+                                
                         } else if (!IO) {
                             IO = true;
+                            System.out.println("entran procesos");
 
-                            for(int j= 0;j<3;j++){
-                                switch (j) {
-                                    case 0:
-                                    
+                                    externo1:
                                      for(int k= 0;k<procesosWait.size();k++){
+                                        
                                         int indice = procesosWait.get(k);
+                                        //System.out.println("Indice: "+indice);
+                                        //System.out.println("Tamaño: "+ (procesos[indice][0]-1));
+                                        
                                             for(int h = 0;h<nodos.size();h++){
+                                                
                                                 int [][] nodo = nodos.get(h);
                                                 for(int l = 0;l<nodo.length;l++){
                                                     int tamañoNodo = nodo[l][1];
-                                                     if(procesos[indice][0]<=tamañoNodo){
-                                                        for(int m=nodo[l][0]+1;m<=tamañoNodo;m++){
-                                                            
+                                                    //System.out.println("Tamaño Nodo: "+tamañoNodo);
+                                                     if(procesos[indice][0]-1<=tamañoNodo){
+                                                        procesos[indice][5] = 1;
+                                                        procesos[indice][3] = nodo[l][0]-1;
+                                                        procesos[indice][4] = nodo[l][0] + tamañoNodo;
+                                                        procesosExec.add(indice);
+                                                        for(int m=0;m<procesosWait.size();m++){
+                                                            if(procesosWait.get(m) == indice)
+                                                                procesosWait.remove(m);
                                                         }
-                                                     }
+                                                        for(int m=nodo[l][0],n=0;n<=tamañoNodo;m++,n++){
+                                                            ram[m] = indice;
+                                                        }
+                                                        
+                                                        continue externo1;
+                                                    }
+
                                                 }
                                             }
                                      }
+                                     
+                                     
+                                     imprimirBloqueRAM(ram, nodos);
+                                     /*for(int k=0;k<procesos.length;k++){
+                                        System.out.print("P"+k+": "+procesos[k][1]+", ");
+                                        }
+                                        */
+                                     //System.exit(0);
+                                     nodos.clear();
 
-                                        break;
-                                    case 1:
-
-                                        break;
-                                    default:
-                                        break;
-                                }
-
-                            }
-
-
-
-
+                            
                         }
                     }
                 } else {
-                    System.out.println("No hay espacio para ningun proceso: ");
-                    break;
+                    System.out.println("No entran procesos");
+                    
                 }
 
-                // break;
+            
 
-                ejecucion = false;
-                ajustes = 4;
-                break;
-
-            }
-
-        }
 
     }
+    public static void imprimirBloqueRAM(int[] ram, ArrayList<int[][]> nodos) {
+        int base = 0;
+        int tamaño = 0;
+        int temp = -50;
+    
+        for (int j = 0; j <= ram.length; j++) {
+            if (j == ram.length) { // último bloque
+                System.out.print(j - 1);
+                System.out.println("");
+                break;
+            }
+    
+            int proceso = ram[j];
+            if (proceso != temp && temp != -50) {
+                System.out.print(j - 1);
+                System.out.println("");
+            }
+    
+            if (proceso >= 0 && proceso != temp) {
+                temp = ram[j];
+                System.out.print("| P" + temp + " | " + j + " - ");
+            }
+    
+            if (proceso == -2 && proceso != temp) {
+                temp = ram[j];
+                System.out.print("| -- | " + j + " - ");
+            }
+        }
+    
+        for (int j = 0; j < ram.length; j++) {
+            int proceso = ram[j];
+            if (proceso == -2) {
+                base = j;
+                tamaño = 0;
+    
+                while (j < ram.length && (ram[j] == -2 || ram[j] == proceso)) {
+                    tamaño++;
+                    j++;
+                }
+    
+                tamaño--;
+    
+                if (tamaño > 0) {
+                    int[][] nodo = { { base, tamaño } };
+                    nodos.add(nodo);
+                }
+            }
+        }
+    
+        for (int j = 0; j < nodos.size(); j++) {
+            int[][] nodo = nodos.get(j);
+            if (base != 0) {
+                System.out.println("Nodo " + j + ":");
+                System.out.println("Base: " + nodo[0][0] + ". Tamaño = " + nodo[0][1]);
+                System.out.println();
+            } else {
+                System.out.println("Nodo 0:");
+                System.out.println("Base: 0. Tamaño = 0");
+            }
+        }
+
+        
+    }
+    
+
 
 }
 
