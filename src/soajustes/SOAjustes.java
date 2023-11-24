@@ -91,15 +91,10 @@ public class SOAjustes {
         }
 
         int base = so;
-        int tamaño = mem - so;
+        int tamaño = (mem - so)-2;
         boolean ejecucion = true, estado1 = true;
         boolean banderaEspacio = false;
-
         
-        
-
-       
-            
                 System.out.println("Estado 0");
                 System.out.println("| SO | 0 - " + so);
                 for(int j=0;j<=so+1;j++){
@@ -108,6 +103,8 @@ public class SOAjustes {
 
                 // ESTADO 0, PROCESOS ENTRAN A MEMORIA
                 for (int j = 0; j < procesos.length && tamaño > 0 && estado1 == true; j++) {
+                    //System.out.println("TAMAÑO: "+tamaño);
+                    //System.out.println("Procesos: "+j+" tamaño: "+procesos[j][0]);
                     if (procesos[j][0] <= tamaño) {
                         banderaEspacio = true;
                         if (j <= 0) {
@@ -120,7 +117,8 @@ public class SOAjustes {
                             for(int k=so+1;k<=base+1;k++){
                                 ram[k]=0;
                             }
-                            tamaño -= procesos[j][0];
+                            
+                            tamaño -= procesos[j][0] ;
                             
                             procesosExec.add(j);
 
@@ -158,7 +156,7 @@ public class SOAjustes {
                    
                 
                                         
-                System.out.println("Tamaño: "+tamaño);
+                //System.out.println("Tamaño: "+tamaño);
                 tamaño-=2;
                 if (banderaEspacio) {
                     estado1 = false;
