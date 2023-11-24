@@ -204,6 +204,7 @@ public class SOAjustes {
                             
                             //System.out.println("salen procesos");
                             // hallar proceso que saldrá, el proceso de menor duración
+                            //metodo menorProceso
                             int duracionMenor = 0;
                             int indiceMenor = procesosExec.get(0);
                             for (int j = 1; j < procesosExec.size(); j++) {
@@ -245,6 +246,7 @@ public class SOAjustes {
                                     */
                             
                             // indicar los procesos en ejecución que saldrán
+                            //metodo procesosSalir
                                 Iterator<Integer> iterator = procesosExec.iterator();
                                 while (iterator.hasNext()) {
                                     /* 
@@ -287,6 +289,7 @@ public class SOAjustes {
                         } else if (!IO) {
                             IO = true;
                             
+                            //metodo procesosEntrar
                             Iterator<Integer> iterator = procesosWait.iterator();
                             while (iterator.hasNext()) {
                                 int indice = iterator.next();
@@ -404,6 +407,77 @@ public class SOAjustes {
 
         
     }
+
+    private static int encontrarProcesoMenorDuracion(ArrayList<Integer> procesosExec, int[][] procesos) {
+        int duracionMenor = procesos[procesosExec.get(0)][1];
+        int indiceMenor = procesosExec.get(0);
+        
+        for (int j = 1; j < procesosExec.size(); j++) {
+            int indice = procesosExec.get(j);
+            if (procesos[indice][1] <= duracionMenor) {
+                duracionMenor = procesos[indice][1];
+                indiceMenor = indice;
+            }
+        }
+        
+        return indiceMenor;
+    }
+    
+
+    private static void entradaYSalidaProcesos(ArrayList<Integer> procesosExec, ArrayList<Integer> procesosWait, int[][] procesos, int[] ram) {
+        boolean IO = true;
+    
+        while (true) {
+            if (IO) {
+                // Lógica para salida de procesos
+                // Encuentra el proceso de menor duración
+                int indiceMenor = encontrarProcesoMenorDuracion(procesosExec, procesos);
+                
+                int duracionMenor = procesos[indiceMenor][1];
+                boolean mismaRafaga = true;
+    
+                // Comprueba si todos los procesos tienen la misma ráfaga de duración
+                for (int j = 0; j < procesosExec.size(); j++) {
+                    int indice = procesosExec.get(j);
+                    if (procesos[indice][1] != duracionMenor) {
+                        mismaRafaga = false;
+                        break;
+                    }
+                }
+    
+                if (mismaRafaga) {
+                    System.out.println("Todos los procesos tienen la misma ráfaga");
+                    break;
+                }
+    
+                // Proceso de menor duración encontrado, calcula el tiempo a restar a otros procesos
+                int rafagaRestar = procesos[indiceMenor][1];
+    
+                // Actualiza la ráfaga de los procesos y libera la memoria correspondiente
+                Iterator<Integer> iterator = procesosExec.iterator();
+                while (iterator.hasNext()) {
+                    int indice = iterator.next();
+                    procesos[indice][1] -= rafagaRestar;
+                    if (procesos[indice][1] <= 0) {
+                        for (int k = procesos[indice][3] + 1; k <= procesos[indice][4]; k++) {
+                            ram[k] = -2;
+                        }
+                        iterator.remove();
+                    }
+                }
+    
+                imprimirBloqueRAM(ram,nodos); // Puedes manejar los nodos de memoria aquí
+    
+            } else {
+                // Lógica para entrada de procesos
+                asignarProcesosAMemoria(procesosWait, nodos, procesos, ram); // Usa el método que definimos anteriormente para asignar procesos a la memoria
+                // Puedes añadir más lógica relacionada con la entrada de procesos aquí si es necesario
+            }
+            
+            IO = !IO; // Alternar entre entrada y salida en cada iteración
+        }
+    }
+    
     
 
 
