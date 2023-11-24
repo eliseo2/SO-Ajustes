@@ -102,7 +102,7 @@ public class SOAjustes {
             
                 System.out.println("Estado 0");
                 System.out.println("| SO | 0 - " + so);
-                for(int j=0;j<=tamaño+1;j++){
+                for(int j=0;j<=so+1;j++){
                     ram[j] = -50;
                 }
 
@@ -116,6 +116,7 @@ public class SOAjustes {
                             procesos[j][3] = so;
                             procesos[j][4] = base;
                             procesos[j][5] = 1;
+                            
                             for(int k=so+1;k<=base+1;k++){
                                 ram[k]=0;
                             }
@@ -136,6 +137,7 @@ public class SOAjustes {
                             procesos[j][4] = procesos[j][0]+base;
                             //System.out.println("BASE: "+(base+1));
                             //System.out.println("LIMITE K: "+(procesos[j][4]+1));
+                            
                             for(int k=base+1;k<=procesos[j][4];k++){
                                 ram[k]=j;
                             }
@@ -153,13 +155,17 @@ public class SOAjustes {
                         continue;
                     }
                 }
-                externo:
+                   
+                
+                                        
+                System.out.println("Tamaño: "+tamaño);
+                tamaño-=2;
                 if (banderaEspacio) {
                     estado1 = false;
                     boolean IO = true; // verdadero = salen procesos, falso = entran procesos
-                    if (tamaño != 0){
+                    if (tamaño > 0){
                         System.out.println("| -- | " + (base+1) + " - " + (mem-1));
-                        tamaño-=2;
+                        
                         System.out.println("Base: "+base+". Tamaño = "+tamaño);
 
                     }
@@ -173,30 +179,32 @@ public class SOAjustes {
                         System.out.println("---");
                     }
 
-                    
+                    externo:
                     // siguientes estados
                     for (int e = 1; banderaEspacio; e++) {
-                        System.out.println("Estado: " + e);
-                        System.out.println("| SO | 0 - " + so);
+                        int contadorProcesosTerminados = 0;
 
                         // si faltan procesos por ejecutar. AGREGAR RESTO DE PROCESOS A PROCESOSWAIT
                         for (int j = 0; j < procesos.length; j++) {
-                            int contadorProcesosTerminados = 0; // comprobar que los procesos hayan todos salido
+                             // comprobar que los procesos hayan todos salido
                             
-                            if (procesos[j][5] == 2) {
+                            if (procesos[j][5] == 1) {
                                 contadorProcesosTerminados++;
+                                //System.out.println("Proceso: "+j);
                             }
                             if (contadorProcesosTerminados == cantidadProcesos) { // POSIBLE ERROR, CUIDAR ÍNDICES
                                 banderaEspacio = false; // termina el programa
-                                System.out.println("Todos los procesos terminados");
+                                System.out.println("Todos los procesos entraron");
                                 break externo;
                             }
                         }
  
-                        
+                                System.out.println("Estado: " + e);
+                                System.out.println("| SO | 0 - " + so);
                         if (IO) { //comprobar que todos los procesos posibles que puedan salir salgan
                             IO = false;
-                            System.out.println("salen procesos");
+                            
+                            //System.out.println("salen procesos");
                             // hallar proceso que saldrá, el proceso de menor duración
                             int duracionMenor = 0;
                             int indiceMenor = procesosExec.get(0);
@@ -230,25 +238,28 @@ public class SOAjustes {
                             // proceso de menor duración encontrado, ahora ver si otro proceso sale al
                             // restarle la ráfaga de ese primer proceso
                             int rafagaRestar = procesos[indiceMenor][1];
-                            procesos[indiceMenor][5] = 2; // indicar que ese proceso salió
+                            //procesos[indiceMenor][5] = 2; // indicar que ese proceso salió
+                            /* 
                             System.out.println("ProcesosWait");
                                     for(int j=0;j<procesosWait.size();j++){
                                         System.out.println(procesosWait.get(j));
                                     }
-
+                                    */
                             
                             // indicar los procesos en ejecución que saldrán
                                 Iterator<Integer> iterator = procesosExec.iterator();
                                 while (iterator.hasNext()) {
+                                    /* 
                                     System.out.println("ProcesosExec");
                                     for(int j=0;j<procesosExec.size();j++){
                                         System.out.println(procesosExec.get(j));
                                     }
+                                    */
                                     int indice = iterator.next();
                                     procesos[indice][1] -= rafagaRestar;
-                                    System.out.println("Proceso: "+indice+" Ráfaga: "+procesos[indice][1]+" RafagaRestar: "+rafagaRestar);
+                                    //System.out.println("Proceso: "+indice+" Ráfaga: "+procesos[indice][1]+" RafagaRestar: "+rafagaRestar);
                                         if (procesos[indice][1] <= 0) {
-                                            procesos[indice][5] = 2;
+                                            //procesos[indice][5] = 2;
                                             for(int k=procesos[indice][3]+1;k<=procesos[indice][4];k++){
                                                 
                                                 ram[k] = -2;
@@ -272,13 +283,12 @@ public class SOAjustes {
                             for(int k=0;k<procesos.length;k++){
                                         System.out.print("P"+k+": "+procesos[k][1]+", ");
                                         }
+                                        System.out.println("");
                                 
                                 
                         } else if (!IO) {
                             IO = true;
-                            System.out.println("entran procesos");
-
-                                    
+                            
                             Iterator<Integer> iterator = procesosWait.iterator();
                             while (iterator.hasNext()) {
                                 int indice = iterator.next();
@@ -296,7 +306,7 @@ public class SOAjustes {
                                             procesosExec.add(indice);
 
                                             procesoAsignado = true; // El proceso ha sido asignado
-                                            System.out.println("Inicio: "+nodo[l][0]+" Final: "+(tamañoNodo+nodo[l][0]));
+                                            //System.out.println("Inicio: "+nodo[l][0]+" Final: "+(tamañoNodo+nodo[l][0]));
                                             for (int m = nodo[l][0]; m <(procesos[indice][0]+nodo[l][0]); m++) {
                                                
                                                 ram[m] = indice;
@@ -320,20 +330,8 @@ public class SOAjustes {
                                         System.out.print("P"+k+": "+procesos[k][1]+", ");
                                         }
                                         */
-                                        /* 
-                                        if(e>=3){
-                                            for(int k=0;k<ram.length;k++){
-                                                System.out.print("J:  "+k+" PROCESOS: "+ram[k]);
-                                                System.out.println("");
-                                            
-                                            }
-
-                                            System.exit(0);
-                                        }
-                                     */
-                                     
-
-                            
+                                         
+                                        
                         }
                     }
                 } else {
