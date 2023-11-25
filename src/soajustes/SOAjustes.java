@@ -18,6 +18,8 @@ public class SOAjustes {
         int cantidadProcesos = 0;
         boolean inte = true;
         int[][] procesos = null;
+        int[][] procesos2 = null;
+        int[][] procesos3 = null;
         int [] ram =null;
         ArrayList<int[][]> nodos = new ArrayList<>();
         ArrayList<Integer> procesosExec = new ArrayList<>();
@@ -57,7 +59,10 @@ public class SOAjustes {
             System.out.println("Inserte la cantidad de procesos");
             if (leer.hasNextInt()) {
                 cantidadProcesos = leer.nextInt();
-                procesos = new int[cantidadProcesos][6]; // numero de proceso, tamaño, duracion, rangoini,
+                procesos = new int[cantidadProcesos][6];
+                procesos2 = new int[cantidadProcesos][6];
+                procesos3 = new int[cantidadProcesos][6];
+                 // numero de proceso, tamaño, duracion, rangoini,
                                                          // rangofin,(0=no ha entrado,1=en ejecucion,2=salió)
 
                 leer.nextLine();     
@@ -66,12 +71,15 @@ public class SOAjustes {
                             "Ingrese el tamaño y la duración del proceso " + (i + 1) + " separados por espacio:");
                     String[] procesoInput = leer.nextLine().split(" ");
                     procesos[i][5] = 0;
+                    procesos2[i][5] = 0;
+                    procesos3[i][5] = 0;
                     procesosWait.add(i);
 
                     if (procesoInput.length == 2) {
                         try {
                             procesos[i][0] = Integer.parseInt(procesoInput[0]);
                             procesos[i][1] = Integer.parseInt(procesoInput[1]);
+            
                         } catch (NumberFormatException e) {
                             System.out.println("Formato inválido para los valores del proceso " + (i + 1) + ".");
                             i--;
@@ -90,11 +98,20 @@ public class SOAjustes {
             }
         }
 
+        for (int i = 0; i < procesos.length; i++) {
+            procesos2[i][0] = procesos[i][0];
+            procesos3[i][0] = procesos[i][0];
+            procesos2[i][1] = procesos[i][1];
+            procesos3[i][1] = procesos[i][1];
+
+        }
+
         int base = so;
         int tamaño = (mem - so)-2;
-        boolean ejecucion = true, estado1 = true;
+        boolean estado1 = true;
         boolean banderaEspacio = false;
-        
+        int ajuste = 0;
+                for(;ajuste<3;ajuste++){}
                 System.out.println("Estado 0");
                 System.out.println("| SO | 0 - " + so);
                 for(int j=0;j<=so+1;j++){
@@ -156,14 +173,13 @@ public class SOAjustes {
                    
                 
                                         
-                //System.out.println("Tamaño: "+tamaño);
-                tamaño-=2;
+                
+                //tamaño-=2;
                 if (banderaEspacio) {
                     estado1 = false;
                     boolean IO = true; // verdadero = salen procesos, falso = entran procesos
                     if (tamaño > 0){
                         System.out.println("| -- | " + (base+1) + " - " + (mem-1));
-                        
                         System.out.println("Base: "+base+". Tamaño = "+tamaño);
 
                     }
@@ -182,48 +198,65 @@ public class SOAjustes {
                     for (int e = 1; banderaEspacio; e++) {
                         int contadorProcesosTerminados = 0;
 
-                        // si faltan procesos por ejecutar. AGREGAR RESTO DE PROCESOS A PROCESOSWAIT
+                        
                         for (int j = 0; j < procesos.length; j++) {
-                             // comprobar que los procesos hayan todos salido
+                             
                             
-                            if (procesos[j][5] == 1) {
+                            if (procesos[j][5] == 1 && ajuste == 0) {
                                 contadorProcesosTerminados++;
-                                //System.out.println("Proceso: "+j);
+                                
                             }
-                            if (contadorProcesosTerminados == cantidadProcesos) { // POSIBLE ERROR, CUIDAR ÍNDICES
+                                else if(procesos2[j][5] == 1 && ajuste == 1){
+                                    contadorProcesosTerminados++;
+                                }
+                                    else if(procesos3[j][5] == 1 && ajuste == 2){
+                                        contadorProcesosTerminados++;
+                                    }
+                            if (contadorProcesosTerminados == cantidadProcesos) { 
+                                if(ajuste==1){
+                                    System.out.println("Mejor Ajuste");
+                                    for(int k=0;k<procesos.length;k++){
+                                    procesos[k][0]=procesos2[k][0];
+                                    procesos[k][1]=procesos2[k][1];
+                                    procesos[k][3]=procesos2[k][3];
+                                    procesos[k][4]=procesos2[k][4];
+                                    procesos[k][5]=procesos2[k][5];
+                                    }
+                                    for(int k=0;k<ram.length;k++){
+                                        if(k<=so+1)
+                                            ram[k]=-50;
+                                        else
+                                            ram[k] = -2;
+                                    
+                                    }
+
+                                }
+                                for(int k=0;k<ram.length;k++){ 
+                                    System.out.print("J:  "+k+" PROCESOS: "+ram[k]);
+                                    System.out.println("");
+                                 }
+                                 System.exit(0);
+
                                 banderaEspacio = false; // termina el programa
                                 System.out.println("Todos los procesos entraron");
                                 break externo;
                             }
                         }
  
-                                System.out.println("Estado: " + e);
-                                System.out.println("| SO | 0 - " + so);
+
+                            System.out.println("Estado: " + e);
+                            System.out.println("| SO | 0 - " + so);
+
+
                         if (IO) { //comprobar que todos los procesos posibles que puedan salir salgan
                             IO = false;
-                            
-                            //System.out.println("salen procesos");
-                            // hallar proceso que saldrá, el proceso de menor duración
-                            //metodo menorProceso
-                            int duracionMenor = 0;
-                            int indiceMenor = procesosExec.get(0);
-                            for (int j = 1; j < procesosExec.size(); j++) {
-                                int indice = procesosExec.get(j);
-                                if (procesos[indice][1] <= procesos[indiceMenor][1]) {
-                                    duracionMenor = procesos[indice][1];                             
-                                    indiceMenor = indice;
 
-                                }
-                                 else{
-                                    duracionMenor=procesos[indiceMenor][1];
-                                 }
-                            }
 
-                           
                             boolean mismaRafaga= true;
+                            int duracion = procesos[procesosExec.get(0)][1];
                             for (int j = 0; j < procesosExec.size(); j++) {
                                 int indice = procesosExec.get(j);
-                                if (procesos[indice][1] != duracionMenor) {
+                                if (procesos[indice][1] != duracion) {
                                     mismaRafaga = false;
                                     break;
                                 }
@@ -234,104 +267,22 @@ public class SOAjustes {
                                 break externo;
                             }
 
-                            // proceso de menor duración encontrado, ahora ver si otro proceso sale al
-                            // restarle la ráfaga de ese primer proceso
-                            int rafagaRestar = procesos[indiceMenor][1];
-                            //procesos[indiceMenor][5] = 2; // indicar que ese proceso salió
-                            /* 
-                            System.out.println("ProcesosWait");
-                                    for(int j=0;j<procesosWait.size();j++){
-                                        System.out.println(procesosWait.get(j));
-                                    }
-                                    */
                             
-                            // indicar los procesos en ejecución que saldrán
                             //metodo procesosSalir
-                                Iterator<Integer> iterator = procesosExec.iterator();
-                                while (iterator.hasNext()) {
-                                    /* 
-                                    System.out.println("ProcesosExec");
-                                    for(int j=0;j<procesosExec.size();j++){
-                                        System.out.println(procesosExec.get(j));
-                                    }
-                                    */
-                                    int indice = iterator.next();
-                                    procesos[indice][1] -= rafagaRestar;
-                                    //System.out.println("Proceso: "+indice+" Ráfaga: "+procesos[indice][1]+" RafagaRestar: "+rafagaRestar);
-                                        if (procesos[indice][1] <= 0) {
-                                            //procesos[indice][5] = 2;
-                                            for(int k=procesos[indice][3]+1;k<=procesos[indice][4];k++){
-                                                
-                                                ram[k] = -2;
-                                            }
-                                            //System.out.println("k: "+procesos[indice][3]);
-                                            //System.out.println("Limite: "+procesos[indice][4]);
-                                            
-                                            iterator.remove();
-                                         } 
-                                         
-                                }                                       
-                                   /* 
-                                for(int j=0;j<ram.length;j++){ 
-                                    System.out.print("J:  "+j+" PROCESOS: "+ram[j]);
-                                    System.out.println("");
-                                 }
-                                 */
-                                       
-                           
+                            salidaProcesos(procesosExec, procesosWait, procesos, ram);
                             imprimirBloqueRAM(ram, nodos);
                             for(int k=0;k<procesos.length;k++){
                                         System.out.print("P"+k+": "+procesos[k][1]+", ");
-                                        }
+                                }
                                         System.out.println("");
                                 
                                 
                         } else if (!IO) {
                             IO = true;
-                            
-                            //metodo procesosEntrar
-                            Iterator<Integer> iterator = procesosWait.iterator();
-                            while (iterator.hasNext()) {
-                                int indice = iterator.next();
-
-                                boolean procesoAsignado = false; // Bandera para verificar si el proceso ha sido asignado
-
-                                for (int h = 0; h < nodos.size(); h++) {
-                                    int[][] nodo = nodos.get(h);
-                                    for (int l = 0; l < nodo.length; l++) {
-                                        int tamañoNodo = nodo[l][1];
-                                        if (procesos[indice][0] - 1 <= tamañoNodo) {
-                                            procesos[indice][5] = 1;
-                                            procesos[indice][3] = nodo[l][0] - 1;
-                                            procesos[indice][4] = nodo[l][0] + procesos[indice][0];
-                                            procesosExec.add(indice);
-
-                                            procesoAsignado = true; // El proceso ha sido asignado
-                                            //System.out.println("Inicio: "+nodo[l][0]+" Final: "+(tamañoNodo+nodo[l][0]));
-                                            for (int m = nodo[l][0]; m <(procesos[indice][0]+nodo[l][0]); m++) {
-                                               
-                                                ram[m] = indice;
-                                            }
-                                            
-                                            break; // Sal del bucle interno una vez que el proceso ha sido asignado
-                                        }
-                                    }
-                                    if (procesoAsignado) {
-                                        iterator.remove(); // Elimina el elemento actual del Iterator
-                                        break; // Sal del bucle externo una vez que el proceso ha sido asignado
-                                    }
-                                }
-                            }
-
-                            
-                                     
+                            entrarProcesos(procesosExec, procesosWait, procesos, ram, nodos);
                                      nodos.clear();
                                      imprimirBloqueRAM(ram, nodos);
-                                     /*for(int k=0;k<procesos.length;k++){
-                                        System.out.print("P"+k+": "+procesos[k][1]+", ");
-                                        }
-                                        */
-                                         
+                                     
                                         
                         }
                     }
@@ -408,7 +359,7 @@ public class SOAjustes {
         
     }
 
-    private static int encontrarProcesoMenorDuracion(ArrayList<Integer> procesosExec, int[][] procesos) {
+    public static int encontrarProcesoMenorDuracion(ArrayList<Integer> procesosExec, int[][] procesos) {
         int duracionMenor = procesos[procesosExec.get(0)][1];
         int indiceMenor = procesosExec.get(0);
         
@@ -424,33 +375,10 @@ public class SOAjustes {
     }
     
 
-    private static void entradaYSalidaProcesos(ArrayList<Integer> procesosExec, ArrayList<Integer> procesosWait, int[][] procesos, int[] ram) {
-        boolean IO = true;
-    
-        while (true) {
-            if (IO) {
+    public static void salidaProcesos(ArrayList<Integer> procesosExec, ArrayList<Integer> procesosWait, int[][] procesos, int[] ram) {
                 // Lógica para salida de procesos
                 // Encuentra el proceso de menor duración
                 int indiceMenor = encontrarProcesoMenorDuracion(procesosExec, procesos);
-                
-                int duracionMenor = procesos[indiceMenor][1];
-                boolean mismaRafaga = true;
-    
-                // Comprueba si todos los procesos tienen la misma ráfaga de duración
-                for (int j = 0; j < procesosExec.size(); j++) {
-                    int indice = procesosExec.get(j);
-                    if (procesos[indice][1] != duracionMenor) {
-                        mismaRafaga = false;
-                        break;
-                    }
-                }
-    
-                if (mismaRafaga) {
-                    System.out.println("Todos los procesos tienen la misma ráfaga");
-                    break;
-                }
-    
-                // Proceso de menor duración encontrado, calcula el tiempo a restar a otros procesos
                 int rafagaRestar = procesos[indiceMenor][1];
     
                 // Actualiza la ráfaga de los procesos y libera la memoria correspondiente
@@ -465,19 +393,45 @@ public class SOAjustes {
                         iterator.remove();
                     }
                 }
-    
-                imprimirBloqueRAM(ram,nodos); // Puedes manejar los nodos de memoria aquí
-    
-            } else {
-                // Lógica para entrada de procesos
-                asignarProcesosAMemoria(procesosWait, nodos, procesos, ram); // Usa el método que definimos anteriormente para asignar procesos a la memoria
-                // Puedes añadir más lógica relacionada con la entrada de procesos aquí si es necesario
-            }
-            
-            IO = !IO; // Alternar entre entrada y salida en cada iteración
-        }
+     
     }
-    
+
+
+    public static void entrarProcesos(ArrayList<Integer> procesosExec,ArrayList<Integer> procesosWait,int[][] procesos, int[] ram, ArrayList<int[][]> nodos){
+        //metodo procesosEntrar
+                            Iterator<Integer> iterator = procesosWait.iterator();
+                            while (iterator.hasNext()) {
+                                int indice = iterator.next();
+
+                                boolean procesoAsignado = false; // Bandera para verificar si el proceso ha sido asignado
+
+                                for (int h = 0; h < nodos.size(); h++) {
+                                    int[][] nodo = nodos.get(h);
+                                    for (int l = 0; l < nodo.length; l++) {
+                                        int tamañoNodo = nodo[l][1];
+                                        if (procesos[indice][0] - 1 <= tamañoNodo) {
+                                            procesos[indice][5] = 1;
+                                            procesos[indice][3] = nodo[l][0] - 1;
+                                            procesos[indice][4] = nodo[l][0] + procesos[indice][0];
+                                            procesosExec.add(indice);
+
+                                            procesoAsignado = true; // El proceso ha sido asignado
+                                            //System.out.println("Inicio: "+nodo[l][0]+" Final: "+(tamañoNodo+nodo[l][0]));
+                                            for (int m = nodo[l][0]; m <(procesos[indice][0]+nodo[l][0]); m++) {
+                                               
+                                                ram[m] = indice;
+                                            }
+                                            
+                                            break; // Sal del bucle interno una vez que el proceso ha sido asignado
+                                        }
+                                    }
+                                    if (procesoAsignado) {
+                                        iterator.remove(); // Elimina el elemento actual del Iterator
+                                        break; // Sal del bucle externo una vez que el proceso ha sido asignado
+                                    }
+                                }
+                            }
+    }
     
 
 
