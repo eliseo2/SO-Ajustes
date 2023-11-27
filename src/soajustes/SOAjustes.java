@@ -29,34 +29,44 @@ public class SOAjustes {
 
         //externo2:
         // preguntar tamaño memoria
-        while (inte) {
+        while (true) {
             System.out.println("Inserte el tamaño de memoria");
             if (leer.hasNextInt()) {
                 mem = leer.nextInt()+1;
-                ram=  new int[mem];
-                for(int j=0;j<mem;j++){
-                    ram[j] = -2;
+                if ((mem-1) > 0) {
+                    ram = new int[mem];
+                    for (int j = 0; j < mem; j++) {
+                        ram[j] = -2;
+                    }
+                    break;
+                } else {
+                    System.out.println("El tamaño de memoria debe ser mayor a cero");
+                    
                 }
-                break;
             } else {
                 System.out.println("Entrada no valida");
                 leer.next();
             }
-
         }
 
+
         // pregunta tamaño sistema operativo
-        while (inte) {
+        while (true) {
             System.out.println("Inserte el tamaño del Sistema Operativo");
             if (leer.hasNextInt()) {
                 so = leer.nextInt();
-                break;
+                if (so > 0) {
+                    break;
+                } else {
+                    System.out.println("El tamaño del Sistema Operativo debe ser mayor a cero");
+                    
+                }
             } else {
                 System.out.println("Entrada no valida");
                 leer.next();
             }
-
         }
+        
 
         while (inte) {
             System.out.println("Inserte la cantidad de procesos");
@@ -472,7 +482,7 @@ public class SOAjustes {
                                                 ram[m] = indice;
                                             }
                                            
-                                            //break; // Sal del bucle interno una vez que el proceso ha sido asignado
+                                            
                                         }
                                     
                                     if (procesoAsignado) {
